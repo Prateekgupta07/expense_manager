@@ -1,5 +1,6 @@
 import 'package:expense_manager/services/notification_plugin.dart';
 import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:intl/intl.dart';
 import 'analytics_page.dart';
 import 'compare_expenses_page.dart';
@@ -7,12 +8,15 @@ import 'db/database_helper.dart';
 import 'expense_bottomsheet.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:timezone/data/latest.dart' as tz;
 
 import 'expense_list.dart';
 
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  MobileAds.instance.initialize();
+  tz.initializeTimeZones();
 
   // Request notification permission
 

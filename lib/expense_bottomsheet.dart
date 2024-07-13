@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:currency_picker/currency_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'db/database_helper.dart';
 
@@ -13,11 +16,15 @@ class _RecordExpensePageState extends State<RecordExpensePage> {
   final _categoryController = TextEditingController();
   String _selectedPaymentMethod = 'Cash';
   String? _selectedCurrency;
+  late InterstitialAd _interstitialAd;
+  bool _isInterstitialAdReady = false;
 
   @override
   void initState() {
     super.initState();
     _loadSelectedCurrency();
+    _loadInterstitialAd();
+
   }
 
   @override
@@ -25,6 +32,39 @@ class _RecordExpensePageState extends State<RecordExpensePage> {
     _amountController.dispose();
     _categoryController.dispose();
     super.dispose();
+  }
+  void _loadInterstitialAd() {
+    InterstitialAd.load(
+      adUnitId: Platform.isAndroid?'ca-app-pub-4952514290719439/9108447957':'ca-app-pub-4952514290719439/6449698864',
+      request: AdRequest(),
+      adLoadCallback: InterstitialAdLoadCallback(
+        onAdLoaded: (InterstitialAd ad) {
+          _interstitialAd = ad;
+          _isInterstitialAdReady = true;
+        },
+        onAdFailedToLoad: (LoadAdError error) {
+          print('Failed to load an interstitial ad: ${error.message}');
+          _isInterstitialAdReady = false;
+        },
+      ),
+    );
+  }
+
+  void _showInterstitialAd() {
+    if (_isInterstitialAdReady) {
+      _interstitialAd.show();
+      _interstitialAd.fullScreenContentCallback = FullScreenContentCallback(
+        onAdDismissedFullScreenContent: (InterstitialAd ad) {
+          ad.dispose();
+          _loadInterstitialAd();
+        },
+        onAdFailedToShowFullScreenContent: (InterstitialAd ad, AdError error) {
+          ad.dispose();
+          print('Failed to show an interstitial ad: ${error.message}');
+          _loadInterstitialAd();
+        },
+      );
+    }
   }
 
   Future<void> _loadSelectedCurrency() async {
@@ -50,6 +90,8 @@ class _RecordExpensePageState extends State<RecordExpensePage> {
     }
     await DatabaseHelper().insertExpense(
         amount, _categoryController.text, _selectedPaymentMethod);
+    _showInterstitialAd();
+
     Navigator.pop(context, true); // Return to previous page and refresh data
   }
 
