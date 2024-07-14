@@ -18,9 +18,7 @@ class _ExpensesListPageState extends State<ExpensesListPage> {
   Map<String, List<Map<String, dynamic>>> _groupedExpenses = {};
   String currency = "\$";
   late BannerAd _bannerAd;
-  late InterstitialAd _interstitialAd;
   bool _isBannerAdReady = false;
-  bool _isInterstitialAdReady = false;
 
   @override
   void initState() {
@@ -129,7 +127,6 @@ class _ExpensesListPageState extends State<ExpensesListPage> {
   @override
   void dispose() {
     _bannerAd.dispose();
-    _interstitialAd.dispose();
     super.dispose();
   }
 

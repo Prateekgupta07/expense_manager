@@ -46,24 +46,24 @@ class NotificationService {
     );
     const iosNotificatonDetail = DarwinNotificationDetails();
 
-
+    final now = DateTime.now();
+    DateTime scheduledDate = DateTime(now.year, now.month, now.day, 20, 00);
     NotificationDetails notificationDetails =
     const NotificationDetails(android: androidPlatformChannelSpecifics, iOS: iosNotificatonDetail);
-
     await flutterLocalNotificationsPlugin.zonedSchedule(
 
       0,
       'Record Daily Expense',
       'Don\'t forget to record your expenses for today!',
-      _nextInstanceOf8PM(),
+tz.TZDateTime.from(scheduledDate,tz.local) ,     androidAllowWhileIdle:true,
       notificationDetails, uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
     );
   }
-  tz.TZDateTime _nextInstanceOf8PM() {
-    final tz.TZDateTime now = tz.TZDateTime.now(tz.local);
-    tz.TZDateTime scheduledDate = tz.TZDateTime(tz.local, now.year, now.month, now.day, 20, 0);
+  DateTime _nextInstanceOf8PM() {
+    final now = DateTime.now();
+    DateTime scheduledDate = DateTime(now.year, now.month, now.day, 20, 0);
     if (scheduledDate.isBefore(now)) {
-      scheduledDate = scheduledDate.add(const Duration(days: 1));
+      scheduledDate = scheduledDate.add(Duration(days: 1));
     }
     return scheduledDate;
   }
