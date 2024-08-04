@@ -11,19 +11,29 @@ class AnalyticsPage extends StatefulWidget {
 
 class _AnalyticsPageState extends State<AnalyticsPage> {
   @override
+  void initState() {
+    // TODO: implement initState
+
+    super.initState();
+  }
+  @override
   Widget build(BuildContext context) {
     return DefaultTabController(
       length: 3,
       child: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.black87, // Background color for the page
         appBar: AppBar(
-          title: Text('Analytics'),
+          title: Text('Analytics', style: TextStyle(color: Colors.yellow),),
+          backgroundColor: Colors.black87, // AppBar background color
           bottom: TabBar(
             tabs: [
               Tab(text: 'Weekly'),
               Tab(text: 'Monthly'),
               Tab(text: 'Yearly'),
             ],
+            labelColor: Colors.yellow, // Selected tab label color
+            unselectedLabelColor: Colors.white, // Unselected tab label color
+            indicatorColor: Colors.yellow, // Tab indicator color
           ),
         ),
         body: TabBarView(
@@ -56,17 +66,38 @@ class AnalyticsTabView extends StatelessWidget {
             } else if (snapshot.hasError) {
               return Text('Error: ${snapshot.error}');
             } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-              return Text('No data available for $period.');
+              return Text('No data available for $period.', style: TextStyle(color: Colors.white));
             } else {
               return SfCartesianChart(
-                primaryXAxis: CategoryAxis(),
-                title: ChartTitle(text: '$period Expenses'),
+                plotAreaBorderWidth: 0,
+                enableAxisAnimation: true,
+                backgroundColor: Colors.black87, // Chart background color
+                primaryXAxis: CategoryAxis(
+
+                  labelStyle: TextStyle(color: Colors.white), // X-axis label color
+                ),
+                legend: Legend(isVisible: true),
+                // Enable tooltip
+                tooltipBehavior: TooltipBehavior(enable: true),
+
+                primaryYAxis: NumericAxis(
+
+                  labelStyle: TextStyle(color: Colors.white), // Y-axis label color
+                ),
+                title: ChartTitle(
+                  text: '${_capitalizeFirstLetter(period)} Expenses',
+                  textStyle: TextStyle(color: Colors.white), // Chart title color
+                ),
                 series: <LineSeries<ChartData, String>>[
                   LineSeries<ChartData, String>(
                     dataSource: snapshot.data!,
                     xValueMapper: (ChartData data, _) => data.x,
                     yValueMapper: (ChartData data, _) => data.y,
-                    dataLabelSettings: DataLabelSettings(isVisible: true),
+                    color: Colors.yellow, // Line color
+                    dataLabelSettings: DataLabelSettings(
+                      isVisible: true,
+                      textStyle: TextStyle(color: Colors.yellow), // Data label color
+                    ),
                   )
                 ],
               );
@@ -91,7 +122,7 @@ class AnalyticsTabView extends StatelessWidget {
       // Format date based on period
       if (period == 'weekly') {
         // Calculate start of week (assuming week starts on Monday)
-        formattedDate = DateFormat('E').format(date); // e.g., Jan 01
+        formattedDate = DateFormat('E').format(date); // e.g., Mon
       } else if (period == 'monthly') {
         formattedDate = DateFormat('MMM dd').format(date); // e.g., Jan 01
       } else {
@@ -125,6 +156,10 @@ class AnalyticsTabView extends StatelessWidget {
     });
 
     return chartData;
+  }
+  String _capitalizeFirstLetter(String text) {
+    if (text.isEmpty) return text;
+    return text[0].toUpperCase() + text.substring(1);
   }
 }
 

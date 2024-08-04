@@ -31,7 +31,7 @@ class _ExpensesListPageState extends State<ExpensesListPage> {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     currency = preferences.getString("selected_currency") ?? "\$";
 
-    final expenses = await DatabaseHelper().getExpensesForPeriod('weekly'); // Default to weekly for now
+    final expenses = await DatabaseHelper().getAllExpenses(); // Fetch all expenses
     _groupExpensesByDate(expenses);
   }
 
@@ -57,11 +57,8 @@ class _ExpensesListPageState extends State<ExpensesListPage> {
     var excel = Excel.createExcel();
     var sheetObject = excel['Sheet1'];
 
-    // Adding headers
-    // sheetObject.appendRow(['Date', 'Category', 'Amount', 'Currency']);
     sheetObject.appendRow([TextCellValue("Date"), TextCellValue("Category"), TextCellValue("Amount")]);
 
-    // Adding expense data
     _groupedExpenses.forEach((date, expenses) {
       for (var expense in expenses) {
         sheetObject.appendRow([
@@ -105,7 +102,7 @@ class _ExpensesListPageState extends State<ExpensesListPage> {
 
   void _loadBannerAd() {
     _bannerAd = BannerAd(
-      adUnitId: Platform.isAndroid?'ca-app-pub-4952514290719439/6158888974':'ca-app-pub-4952514290719439/9735171901',
+      adUnitId: Platform.isAndroid ? 'ca-app-pub-3940256099942544/6300978111' : 'ca-app-pub-3940256099942544/6300978111',
       request: AdRequest(),
       size: AdSize.banner,
       listener: BannerAdListener(
@@ -133,33 +130,40 @@ class _ExpensesListPageState extends State<ExpensesListPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.black87.withOpacity(0.9),
       appBar: AppBar(
-        title: Text('Expense Management'),
+        title: Text('Expense Management', style: TextStyle(color: Colors.yellow)),
+        backgroundColor: Colors.black87,
         actions: [
           IconButton(
-            icon: Icon(Icons.download),
+            icon: Icon(Icons.download, color: Colors.yellow),
             onPressed: _downloadExcelFile,
           ),
         ],
       ),
       body: Column(
         children: [
-
           Expanded(
             child: _groupedExpenses.isEmpty
-                ? Center(child: Text('No expenses recorded yet.'))
+                ? Center(
+              child: Text(
+                'No expenses recorded yet.',
+                style: TextStyle(color: Colors.yellow),
+              ),
+            )
                 : ListView.builder(
               itemCount: _groupedExpenses.keys.length,
               itemBuilder: (context, index) {
                 final date = _groupedExpenses.keys.elementAt(index);
                 final expenses = _groupedExpenses[date]!;
                 return ExpansionTile(
-                  title: Text(date),
+                  iconColor: Colors.yellow,
+                  collapsedIconColor: Colors.yellow,
+                  title: Text(date, style: TextStyle(color: Colors.yellow)),
                   children: expenses.map((expense) {
                     return ListTile(
-                      title: Text('${expense['category']}'),
-                      trailing: Text('$currency${expense['amount']}'),
+                      title: Text('${expense['category']}', style: TextStyle(color: Colors.white)),
+                      trailing: Text('$currency${expense['amount']}', style: TextStyle(color: Colors.white)),
                     );
                   }).toList(),
                 );
@@ -178,7 +182,8 @@ class _ExpensesListPageState extends State<ExpensesListPage> {
         onPressed: () {
           _navigateToRecordExpensePage(context);
         },
-        child: Icon(Icons.add),
+        backgroundColor: Colors.yellow,
+        child: Icon(Icons.add, color: Colors.black87),
       ),
     );
   }

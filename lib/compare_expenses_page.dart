@@ -13,7 +13,7 @@ class _CompareExpensesPageState extends State<CompareExpensesPage> {
   late List<Map<String, dynamic>> _currentWeekExpenses = [];
   late List<Map<String, dynamic>> _lastMonthExpenses = [];
   late List<Map<String, dynamic>> _currentMonthExpenses = [];
-  String currency ="";
+  String currency = "";
 
   bool _isLoading = true;
 
@@ -26,19 +26,21 @@ class _CompareExpensesPageState extends State<CompareExpensesPage> {
   Future<void> _fetchExpenses() async {
     final now = DateTime.now();
     SharedPreferences preferences = await SharedPreferences.getInstance();
-    currency = preferences.getString("selected_currency")??"\$";
-    // Current week start and end dates (Monday to now)
+    currency = preferences.getString("selected_currency") ?? "\$";
+
+    // Date calculations
     final currentWeekStartDate = now.subtract(Duration(days: now.weekday - DateTime.monday));
     final currentWeekEndDate = now;
 
-    // Last week start and end dates (Last Monday to last Sunday)
     final lastWeekStart = currentWeekStartDate.subtract(Duration(days: 7));
     final lastWeekEnd = lastWeekStart.add(Duration(days: 6));
 
-    // Last month start and end dates (First day of last month to last day of last month)
     final lastMonthStart = DateTime(now.year, now.month - 1, 1);
     final lastMonthEnd = DateTime(now.year, now.month, 1).subtract(Duration(days: 1));
 
+    final currentMonthStart = DateTime(now.year, now.month, 1);
+
+    // Fetch expenses
     final lastWeekExpenses = await DatabaseHelper().getExpensesForCustomPeriod(
       DateFormat('yyyy-MM-dd').format(lastWeekStart),
       DateFormat('yyyy-MM-dd').format(lastWeekEnd),
@@ -55,7 +57,7 @@ class _CompareExpensesPageState extends State<CompareExpensesPage> {
     );
 
     final currentMonthExpenses = await DatabaseHelper().getExpensesForCustomPeriod(
-      DateFormat('yyyy-MM-dd').format(DateTime(now.year, now.month, 1)),
+      DateFormat('yyyy-MM-dd').format(currentMonthStart),
       DateFormat('yyyy-MM-dd').format(now),
     );
 
@@ -69,11 +71,7 @@ class _CompareExpensesPageState extends State<CompareExpensesPage> {
   }
 
   double _calculateTotalExpenses(List<Map<String, dynamic>> expenses) {
-    double total = 0.0;
-    for (var expense in expenses) {
-      total += expense['amount'];
-    }
-    return total;
+    return expenses.fold(0.0, (total, expense) => total + expense['amount']);
   }
 
   double _calculateDifference(double currentTotal, double lastTotal) {
@@ -83,27 +81,32 @@ class _CompareExpensesPageState extends State<CompareExpensesPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(title: Text('Compare Expenses')),
+      backgroundColor: Colors.black87.withOpacity(0.9),
+      appBar: AppBar(
+        title: Text('Compare Expenses', style: TextStyle(color: Colors.yellow)),
+        backgroundColor: Colors.black87,
+      ),
       body: _isLoading
           ? Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-        padding: EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            _buildComparisonCard(
-              title: 'Weekly Comparison',
-              lastExpenses: _lastWeekExpenses,
-              currentExpenses: _currentWeekExpenses,
-            ),
-            SizedBox(height: 20),
-            _buildComparisonCard(
-              title: 'Monthly Comparison',
-              lastExpenses: _lastMonthExpenses,
-              currentExpenses: _currentMonthExpenses,
-            ),
-          ],
+          : Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _buildComparisonCard(
+                title: 'Weekly Comparison',
+                lastExpenses: _lastWeekExpenses,
+                currentExpenses: _currentWeekExpenses,
+              ),
+              SizedBox(height: 20),
+              _buildComparisonCard(
+                title: 'Monthly Comparison',
+                lastExpenses: _lastMonthExpenses,
+                currentExpenses: _currentMonthExpenses,
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -120,6 +123,11 @@ class _CompareExpensesPageState extends State<CompareExpensesPage> {
 
     return Card(
       elevation: 4,
+      color: Colors.yellow,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      margin: EdgeInsets.symmetric(vertical: 10),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -127,12 +135,26 @@ class _CompareExpensesPageState extends State<CompareExpensesPage> {
           children: [
             Text(
               title,
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
             ),
             SizedBox(height: 10),
-            Text('Last Period Total: $currency ${lastTotal.toStringAsFixed(2)}'),
-            Text('Current Period Total: $currency ${currentTotal.toStringAsFixed(2)}'),
-            Text('Difference: $currency ${difference.toStringAsFixed(2)}'),
+            Text(
+              'Last Period Total: $currency ${lastTotal.toStringAsFixed(2)}',
+              style: TextStyle(color: Colors.black,                 fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              'Current Period Total: $currency ${currentTotal.toStringAsFixed(2)}',
+              style: TextStyle(color: Colors.black,                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              'Difference: $currency ${difference.toStringAsFixed(2)}',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: difference >= 0 ? Colors.green : Colors.red,
+              ),
+            ),
           ],
         ),
       ),

@@ -43,7 +43,10 @@ class DatabaseHelper {
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
   }
-
+  Future<List<Map<String, dynamic>>> getAllExpenses() async {
+    final db = await database;
+    return await db.query('expenses', orderBy: 'date DESC');
+  }
   // Original method to fetch expenses for predefined periods (weekly, monthly, yearly)
   Future<List<Map<String, dynamic>>> getExpensesForPeriod(String period) async {
     final db = await database;

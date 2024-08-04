@@ -24,7 +24,6 @@ class _RecordExpensePageState extends State<RecordExpensePage> {
     super.initState();
     _loadSelectedCurrency();
     _loadInterstitialAd();
-
   }
 
   @override
@@ -33,9 +32,10 @@ class _RecordExpensePageState extends State<RecordExpensePage> {
     _categoryController.dispose();
     super.dispose();
   }
+
   void _loadInterstitialAd() {
     InterstitialAd.load(
-      adUnitId: Platform.isAndroid?'ca-app-pub-4952514290719439/9108447957':'ca-app-pub-4952514290719439/6449698864',
+      adUnitId: Platform.isAndroid ? 'ca-app-pub-3940256099942544/1033173712' : 'ca-app-pub-3940256099942544/1033173712',
       request: AdRequest(),
       adLoadCallback: InterstitialAdLoadCallback(
         onAdLoaded: (InterstitialAd ad) {
@@ -88,8 +88,7 @@ class _RecordExpensePageState extends State<RecordExpensePage> {
       );
       return;
     }
-    await DatabaseHelper().insertExpense(
-        amount, _categoryController.text, _selectedPaymentMethod);
+    await DatabaseHelper().insertExpense(amount, _categoryController.text, _selectedPaymentMethod);
     _showInterstitialAd();
 
     Navigator.pop(context, true); // Return to previous page and refresh data
@@ -113,57 +112,103 @@ class _RecordExpensePageState extends State<RecordExpensePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(title: Text('Record Expense')),
+      backgroundColor: Colors.black87,
+      appBar: AppBar(
+        iconTheme: IconThemeData(color: Colors.yellow),
+        title: Text('Record Expense', style: TextStyle(color: Colors.yellow),),
+        backgroundColor: Colors.black87,
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
             Row(
               children: [
-                Expanded(flex: 1,
+                Expanded(
+                  flex: 1,
                   child: InkWell(
                     onTap: _showCurrencyPicker,
                     child: Row(
                       children: [
-                        Icon(Icons.arrow_drop_down_outlined),
-                        Text(_selectedCurrency ?? "\$")
+                        Icon(Icons.arrow_drop_down_outlined, color: Colors.yellow),
+                        SizedBox(width: 4),
+                        Text(
+                          _selectedCurrency ?? "\$",
+                          style: TextStyle(color: Colors.yellow, fontSize: 16),
+                        ),
                       ],
                     ),
                   ),
                 ),
-                Expanded(flex: 4,
+                Expanded(
+                  flex: 4,
                   child: TextField(
                     controller: _amountController,
                     keyboardType: TextInputType.number,
-                    decoration: InputDecoration(labelText: 'Amount'),
+                    decoration: InputDecoration(
+                      labelText: 'Amount',
+                      labelStyle: TextStyle(color: Colors.yellow),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.yellow),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.yellow),
+                      ),
+                    ),
+                    style: TextStyle(color: Colors.white),
                   ),
                 ),
               ],
             ),
+            SizedBox(height: 16),
             TextField(
               controller: _categoryController,
               keyboardType: TextInputType.text,
-              decoration: InputDecoration(labelText: 'Category'),
+              decoration: InputDecoration(
+                labelText: 'Category',
+                labelStyle: TextStyle(color: Colors.yellow),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.yellow),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.yellow),
+                ),
+              ),
+              style: TextStyle(color: Colors.white),
             ),
+            SizedBox(height: 16),
             DropdownButtonFormField<String>(
               value: _selectedPaymentMethod,
               items: ['Cash', 'Card', 'Online']
                   .map((method) => DropdownMenuItem(
-                        value: method,
-                        child: Text(method),
-                      ))
+                value: method,
+                child: Text(method),
+              ))
                   .toList(),
               onChanged: (value) {
                 setState(() {
                   _selectedPaymentMethod = value!;
                 });
               },
-              decoration: InputDecoration(labelText: 'Payment Method'),
+              decoration: InputDecoration(
+                labelText: 'Payment Method',
+                labelStyle: TextStyle(color: Colors.yellow),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.yellow),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.yellow),
+                ),
+              ),
+              dropdownColor: Colors.black87,
+              style: TextStyle(color: Colors.white),
             ),
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: _saveExpense,
+              style: ElevatedButton.styleFrom(
+                foregroundColor: Colors.black87, backgroundColor: Colors.yellow,
+              ),
               child: Text('Save Expense'),
             ),
           ],
